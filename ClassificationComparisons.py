@@ -1,54 +1,32 @@
 import json
 import numpy as np
 
-def compare_classification(user_data, ml_data):
+def compare_classification(user_data: str, ml_data: dict) -> str:
+    # Parse the JSON strings into dictionaries
+    user_data = json.loads(user_data)
     
-    userData = json.loads(list)
-    mlData = json.load(dict)
-    
-    userResults = []
-    mlResults = []
-    
-    i = 0
-    for key in mlData:
-        userClass = int(userData[i])
-        mlClass = int(mlData[key])
-        
-        userResults.append(userClass)
-        mlResults.append(mlClass)
-        i=i+1
-        
-    userPerformance = np.array([])
-    
-    for i in np.arange(len(mlResults)):
-        if (mlResults[i] == 0) and (userResults[i] == 0):
-            userPerformance = np.append(userPerformance, 0)
-        elif (mlResults[i] == 0) and (userResults[i] == 1):
-            userPerformance = np.append(userPerformance, 1)
-        elif (mlResults[i] == 1) and (userResults[i] == 0):
-            userPerformance = np.append(userPerformance, 0)
-        elif (mlResults[i] == 1) and (userResults[i] == 1):
-            userPerformance = np.append(userPerformance, 1)
-            
-    userAccuracy = np.count_nonzero(userPerformance == 1)/userPerformance.shape[0]
-    
-    networkPerformance = np.array([mlData])
-    
-    networkAccuracy = np.count_nonzero(networkPerformance == 1)/networkPerformance.shape[0]
-    
-    if networkAccuracy > userAccuracy:
-        diff = 100*(networkAccuracy-userAccuracy)
-        diff = str(diff)
-        string = "The neural network beat you by " + diff + "%."
-        return string
-    elif networkAccuracy == userAccuracy:
-        string = "You tied with the neural network."
-        return string
-    elif networkAccuracy < userAccuracy:
-        diff = 100*(userAccuracy-networkAccuracy)
-        diff = str(diff)
-        string = "You beat the neural network by " + diff + "%."
-        return string
-        
-    
-        
+    # Extract user and ML results from the dictionaries
+    user_results = [int(user_data[key]) for key in ml_data]
+    ml_results = [int(ml_data[key]) for key in ml_data]
+
+    # Compute user performance based on comparison of user and ml results
+    user_performance = np.array([
+        1 if user_results[i] == ml_results[i] else 0 
+        for i in range(len(ml_results))
+    ])
+
+    user_accuracy = np.mean(user_performance)
+
+    # Convert ml_results directly into an array for accuracy comparison
+    ml_performance = np.array(ml_results)
+    network_accuracy = np.mean(ml_performance)
+
+    if network_accuracy > user_accuracy:
+        diff = (network_accuracy - user_accuracy) * 100
+        return f"The neural network beat you by {diff:.2f}%."
+    elif network_accuracy == user_accuracy:
+        return "You tied with the neural network."
+    else:
+        diff = (user_accuracy - network_accuracy) * 100
+        return f"You beat the neural network by {diff:.2f}%."
+
